@@ -184,14 +184,23 @@ function! s:mergeMenus(target, merging)
     call s:sort(a:target.items)
 endfunction
 
-function! venu#print() abort
-    let s:printCallback = get(g:, "venu_print_callback",
+function! venu#print(...) abort
+    if a:0 > 1
+      echoerr "Only optional argument allowed is configuration dictionary"
+    endif
+    let l:conf = get(a:, 1, {})
+    let s:printCallback = get(l:conf, "PrintCallback",
                 \ function("venu#defaultPrintCallback"))
-    let s:selectCallback = get(g:, "venu_select_callback",
+    let s:selectCallback = get(l:conf, "SelectCallback",
                 \ function("venu#defaultSelectCallback"))
-    let s:formatEntryCallback = get(g:, "venu_format_entry_callback",
+    let s:formatEntryCallback = get(l:conf, "FormatEntryCallback",
                 \ function("venu#defaultFormatEntryCallback"))
+    let s:startVenuCallback = get(l:conf, "StartVenuCallback",
+                \ function("venu#defaultStartVenuCallback"))
+    call s:startVenuCallback()
+endfunction
 
+function! venu#defaultStartVenuCallback() abort
     let l:availableMenus = filter(copy(s:menus),
             \"len(v:val.filetypes) == 0 || index(v:val.filetypes, &ft) >= 0")
 
