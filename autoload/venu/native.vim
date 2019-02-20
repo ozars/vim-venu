@@ -12,14 +12,6 @@ function! venu#native#defaultFilter(key, menu) abort
   return has_key(a:menu.mode, "n")
 endfunction
 
-let s:menu_filter = get(g:, "venu_native_menu_filter",
-                      \ function("venu#native#defaultFilter"))
-let s:menu_cmd    = get(g:, "venu_native_menu_cmd", "amenu")
-
-if type(s:menu_filter) != v:t_func
-  echoerr "Type of g:venu_menu_filter must be Funcref"
-endif
-
 function! s:ParseMenuLine(line) abort
   let l:until_eol_regex = '(.{-})\s*\r?$'
   let l:menu_regex = '\v^( *)(-?\d+) ' . l:until_eol_regex
@@ -67,13 +59,10 @@ function! s:ExtractShortcut(name) abort
 endfunction
 
 function! venu#native#parseMenu(...) abort
-  if a:0 == 0
-    let l:menu_cmd = s:menu_cmd
-  elseif a:0 == 1
-    let l:menu_cmd = a:1
-  else
+  if a:0 > 1
     echoerr "Only optional argument allowed is menu command."
   endif
+  let l:menu_cmd = get(a:, 1, get(g:, "venu_native_menu_cmd", "amenu"))
   let l:menu_str = execute(l:menu_cmd)
   let l:root = []
   let l:prevdepth = 0
@@ -157,13 +146,15 @@ function! venu#native#createVenuFromMenu(menu) abort
 endfunction
 
 function! venu#native#import(...) abort
-  if a:0 == 0
-    let l:Filter = s:menu_filter
-  elseif a:0 == 1
-    let l:Filter = a:1
-  else
+  if a:0 > 1
     echoerr "Only optional argument allowed is filter."
   endif
+
+  let l:Filter = get(a:, 1, function("venu#native#defaultFilter"))
+  if type(l:Filter) != v:t_func
+    echoerr "Type of menu filter must be Funcref."
+  endif
+
   let l:menus = venu#native#parseMenu()
   call filter(l:menus, l:Filter)
   for l:menu in l:menus
