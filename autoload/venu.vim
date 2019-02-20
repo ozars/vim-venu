@@ -186,11 +186,11 @@ endfunction
 
 function! venu#print() abort
     let s:printCallback = get(g:, "venu_print_callback",
-                \ function("s:print"))
+                \ function("venu#defaultPrintCallback"))
     let s:selectCallback = get(g:, "venu_select_callback",
-                \ function("s:select"))
+                \ function("venu#defaultSelectCallback"))
     let s:formatEntryCallback = get(g:, "venu_format_entry_callback",
-                \ function("s:formatEntry"))
+                \ function("venu#defaultFormatEntryCallback"))
 
     let l:availableMenus = filter(copy(s:menus),
             \"len(v:val.filetypes) == 0 || index(v:val.filetypes, &ft) >= 0")
@@ -216,7 +216,7 @@ function! s:startVenu(name, itemsOrMenus)
     endif
 endfunction
 
-function! s:print(name, itemsOrMenus) abort
+function! venu#defaultPrintCallback(name, itemsOrMenus) abort
     echohl Title
     echo a:name . " (V̂enu " . s:VERSION . ")"
     echohl None
@@ -229,14 +229,14 @@ function! s:print(name, itemsOrMenus) abort
     echo "0. Exit"
 endfunction
 
-function! s:formatEntry(rowNum, entry)
+function! venu#defaultFormatEntryCallback(rowNum, entry)
         return a:rowNum . ". " . a:entry.name .
                     \ (&verbose > 0 ? " (pos_pref: " . a:entry.pos_pref .
                     \ " , priority: " . a:entry.priority . ")"
                     \ : "")
 endfunction
 
-function! s:select(choices)
+function! venu#defaultSelectCallback(choices)
     let l:char = nr2char(getchar())
 
     if l:char == "\<ESC>" || l:char == 0
